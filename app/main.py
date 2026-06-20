@@ -1,7 +1,7 @@
 from fastapi import FastAPI
-from app.db import Base, engine
-from app.routers_categories import router as categories_router
-from app.routers_books import router as books_router
+from app.db.db import Base, engine
+from app.api.categories import router as categories_router
+from app.api.books import router as books_router
 
 Base.metadata.create_all(bind=engine)
 
