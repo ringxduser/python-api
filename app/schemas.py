@@ -1,24 +1,30 @@
-from pydantic import BaseModel
 from typing import Optional
+from pydantic import BaseModel, ConfigDict
 
-class CategoryCreate(BaseModel):
+
+class CategoryBase(BaseModel):
     title: str
+
+class CategoryCreate(CategoryBase):
+    pass
 
 class CategoryUpdate(BaseModel):
     title: Optional[str] = None
 
-class CategoryResponse(BaseModel):
+class CategoryResponse(CategoryBase):
     id: int
-    title: str
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
-class BookCreate(BaseModel):
+
+class BookBase(BaseModel):
     title: str
     description: Optional[str] = None
     price: Optional[float] = None
     url: Optional[str] = None
     category_id: int
+
+class BookCreate(BookBase):
+    pass
 
 class BookUpdate(BaseModel):
     title: Optional[str] = None
@@ -27,12 +33,6 @@ class BookUpdate(BaseModel):
     url: Optional[str] = None
     category_id: Optional[int] = None
 
-class BookResponse(BaseModel):
+class BookResponse(BookBase):
     id: int
-    title: str
-    description: Optional[str] = None
-    price: Optional[float] = None
-    url: Optional[str] = None
-    category_id: int
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)

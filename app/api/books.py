@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import Optional
 from app.db.db import get_db
@@ -18,20 +18,18 @@ def get_book(book_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Книга не найдена")
     return book
 
-@router.post("/", response_model=BookResponse)
+@router.post("/", response_model=BookResponse, status_code=status.HTTP_201_CREATED)
 def create_book(book: BookCreate, db: Session = Depends(get_db)):
-    return crud.create_book(db, book.title, book.description, book.price, book.url, book.category_id)
+    if not crud.get_category(db, book.category_id):
+        raise HTTPException(status_code=404, detail="Категория не найдена")
+    return crud.create_book(db, **book.model_dump())
 
 @router.put("/{book_id}", response_model=BookResponse)
 def update_book(book_id: int, book: BookUpdate, db: Session = Depends(get_db)):
-    updated = crud.update_book(
-        db, book_id,
-        title=book.title,
-        description=book.description,
-        price=book.price,
-        url=book.url,
-        category_id=book.category_id,
-    )
+    data = book.model_dump(exclude_unset=True)
+    if data.get("category_id") is not None and not crud.get_category(db, data["category_id"]):
+        raise HTTPException(status_code=404, detail="Категория не найдена")
+    updated = crud.update_book(db, book_id, **data)
     if not updated:
         raise HTTPException(status_code=404, detail="Книга не найдена")
     return updated

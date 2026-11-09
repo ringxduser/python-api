@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from app.db.db import get_db
 from app.db import crud
@@ -17,13 +17,13 @@ def get_category(category_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Категория не найдена")
     return category
 
-@router.post("/", response_model=CategoryResponse)
+@router.post("/", response_model=CategoryResponse, status_code=status.HTTP_201_CREATED)
 def create_category(category: CategoryCreate, db: Session = Depends(get_db)):
-    return crud.create_category(db, category.title)
+    return crud.create_category(db, **category.model_dump())
 
 @router.put("/{category_id}", response_model=CategoryResponse)
 def update_category(category_id: int, category: CategoryUpdate, db: Session = Depends(get_db)):
-    updated = crud.update_category(db, category_id, category.title)
+    updated = crud.update_category(db, category_id, **category.model_dump(exclude_unset=True))
     if not updated:
         raise HTTPException(status_code=404, detail="Категория не найдена")
     return updated

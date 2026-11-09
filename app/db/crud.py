@@ -1,7 +1,7 @@
 from app.db.models import Category, Book
 
-def create_category(db, title):
-    category = Category(title=title)
+def create_category(db, **data):
+    category = Category(**data)
     db.add(category)
     db.commit()
     db.refresh(category)
@@ -13,11 +13,13 @@ def get_category(db, category_id):
 def get_all_categories(db):
     return db.query(Category).all()
 
-def update_category(db, category_id, title):
+def update_category(db, category_id, **data):
     category = get_category(db, category_id)
     if not category:
         return None
-    category.title = title
+    for key, value in data.items():
+        if value is not None:
+            setattr(category, key, value)
     db.commit()
     db.refresh(category)
     return category
@@ -30,8 +32,8 @@ def delete_category(db, category_id):
     db.commit()
     return category
 
-def create_book(db, title, description, price, url, category_id):
-    book = Book(title=title, description=description, price=price, url=url, category_id=category_id)
+def create_book(db, **data):
+    book = Book(**data)
     db.add(book)
     db.commit()
     db.refresh(book)
